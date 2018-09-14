@@ -91,24 +91,26 @@ app.get('/favorites', function(req, res){
  *
  */
 //TODO: this looks like it should be PUT request not a get
-//app.get('favorites', function(req, res){
+app.post('/favorites', function(req, res){
 
-  ////if the body doesn't have a name and object ID
-  ////then let the client know we have an error
-  //if(!req.body.name || !req.body.oid){
-    //res.send("Error");
-    //return;
-  //}
+  if(!req.body.imdbID){
+    res.send("Error. Request body does not have a valid imdbID");
+    return;
+  }
   
-  ////append the data from the client to the data file
-  //var data = JSON.parse(fs.readFileSync('./data.json'));
-  //data.push(req.body);
-  //fs.writeFile('./data.json', JSON.stringify(data));
-  //res.setHeader('Content-Type', 'application/json');
+  //read in the current data from our file
+  var data = JSON.parse(fs.readFileSync('./data.json'));
 
-  ////return the newly formed data to the client
-  //res.send(data);
-//});
+  //append the data from the client to the data file
+  data.push(req.body);
+
+  //save the new data to our filesystem for persistence
+  fs.writeFile('./data.json', JSON.stringify(data));
+
+  //return the newly formed data to the client
+  res.setHeader('Content-Type', 'application/json');
+  res.send(data);
+});
 
 /** run the webserver. This is like running the main() in a c program 
  * Here we've setup the server to run on port 3000 of the localhost.
