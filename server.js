@@ -37,7 +37,6 @@ app.use(bodyParser.json());
  */
 app.use('/', express.static(path.join(__dirname, 'public')));
 
-
 /** Search for movies by the given text. 
  *
  */
@@ -54,6 +53,22 @@ function searchMovie(searchText) {
   return request('http://www.omdbapi.com/?'+search)
     .then((moviesAsJSONString) => {
       return JSON.parse(moviesAsJSONString).Search;
+    });
+}
+
+function getMovieDetails(imdbID) {
+  if(typeof(imdbID) != 'string' || imdbID === '')
+  {
+    return Promise.resolve([]);
+  }
+
+  //sanitize the search
+  var search = querystring.stringify({i: imdbID, apikey: omdbApiKey});
+  
+  //send the request
+  return request('http://www.omdbapi.com/?'+search)
+    .then((moviesAsJSONString) => {
+      return JSON.parse(moviesAsJSONString);
     });
 }
 
@@ -142,6 +157,15 @@ app.post('/favorites', function(req, res){
   //return the newly formed data to the client
   res.setHeader('Content-Type', 'application/json');
   res.send(movie);
+});
+
+app.get('/details', function(req, res) {
+  getMovieDetails(req.query.imdbID)
+    .then(foundMovie => {
+
+      res.setHeader('Content-Type', 'application/json');
+      res.send(foundMovie);
+    });
 });
 
 /** run the webserver. This is like running the main() in a c program 
