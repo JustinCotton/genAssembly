@@ -5,7 +5,8 @@
     <title>General Assembly Coding Challenge</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css">
-    <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <script src="frontend.js"></script>
   </head>
   <body>
     <div class="section">
@@ -13,33 +14,27 @@
       <div class="columns is-centered">
         <div class="column is-half">
 
-              <h1 class="title is-1">Search</h1>
-              <h2 class="subtitle">Lookup movies by title</h1>
+          <h1 class="title is-1">Movie Lister</h1>
+          <h2 class="subtitle">Lookup movies by title</h1>
 
-              <form>
-                <div class="field has-addons">
-                  <div class="control is-expanded">
-                    <input class="input is-large is-rounded" type="text" placeholder="Movie Title">
-                  </div>
-                  <div class="control">
-                    <a class="button is-link is-large is-rounded"><i class="fas fa-search"></i></a>
-                  </div>
-                </div>
-              </form>
+          <div class="field has-addons">
+            <div class="control is-expanded">
+              <input id="movieSearchText" class="input is-large is-rounded" type="text" placeholder="Movie Title">
+            </div>
+            <div class="control">
+              <button onclick="submitMovieSearch()" class="button is-primary is-large is-rounded"><i class="fa fa-search"></i></button>
+            </div>
+          </div>
+
+          <button class="button is-rounded is-info" onclick="showFavorites()"><i class="fa fa-star-o"></i>&nbsp; Favorites</button>
         </div>
       </div>
     </div>
     </div>
-      <!--<div class="hero-body">-->
-        <!--<div class="container">-->
-          <!--<h1 class="title">-->
-            <!--Search-->
-          <!--</h1>-->
-          <!--<h2 class="subtitle">-->
-            <!--A simple index on movie information-->
-          <!--</h2>-->
-        <!--</div>-->
-      <!--</div>-->
 
+    <div class="section">
+      <div id="movieCards" class="container">
+      </div>
+    </div>
   </body>
 </html>

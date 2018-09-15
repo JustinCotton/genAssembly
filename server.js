@@ -16,26 +16,6 @@ var app = express();
 /** this is an API key required to send queries to ombd */
 var omdbApiKey = "c41ae294";
 
-/** Search for movies by the given text. 
- *
- */
-function searchMovie(searchText)
-{
-  if(typeof(searchText) != 'string')
-  {
-    return [];
-  }
-
-  //sanitize the search
-  var search = querystring.stringify({s: searchText, apikey: omdbApiKey});
-  
-  //send the request
-  return request('http://www.omdbapi.com/?'+search)
-    .then((moviesAsJSONString) => {
-      return JSON.parse(moviesAsJSONString);
-    });
-}
-
 /** add `./public` as a static resource for the website */
 app.use(express.static(path.join(__dirname, '/public')));
 
@@ -57,14 +37,68 @@ app.use(bodyParser.json());
  */
 app.use('/', express.static(path.join(__dirname, 'public')));
 
+
+/** Search for movies by the given text. 
+ *
+ */
+function searchMovie(searchText) {
+  if(typeof(searchText) != 'string' || searchText === '')
+  {
+    return Promise.resolve([]);
+  }
+
+  //sanitize the search
+  var search = querystring.stringify({s: searchText, apikey: omdbApiKey});
+  
+  //send the request
+  return request('http://www.omdbapi.com/?'+search)
+    .then((moviesAsJSONString) => {
+      return JSON.parse(moviesAsJSONString).Search;
+    });
+}
+
+function getFavoritesDB() {
+  //read the the data.json from the filesystem
+  return JSON.parse(fs.readFileSync('./data.json'));
+}
+
+function setFavoritesDB(favorites) {
+  //save the new data to our filesystem for persistence
+  fs.writeFile('./data.json', JSON.stringify(favorites));
+}
+
+function addFavoriteMovie(favorites, movie) {
+  if(movie.isFavorite 
+    && !favorites.some(favoriteMovie => favoriteMovie.imdbID == movie.imdbID)
+  ){
+    //append the data from the client to the data file
+    favorites.push(movie);
+  }
+
+  return favorites;
+}
+
+function removeFavoriteMovie(favorites, imdbID) {
+  return favorites.filter(movie => movie.imdbID != imdbID);
+}
+
 /** Search for a movie by the title
  *
  */
 app.get('/search', function(req, res){
+
+  var favorites = getFavoritesDB();
+
   searchMovie(req.query.name)
-    .then((foundMovies) => {
+    .then(foundMovies => {
+
+      foundMovies.forEach(movie => {
+        movie.isFavorite = 
+          favorites.some(favoriteMovie => favoriteMovie.imdbID === movie.imdbID);
+      });
+
       res.setHeader('Content-Type', 'application/json');
-      res.send(foundMovies.Search);
+      res.send(foundMovies);
     });
 });
 
@@ -74,17 +108,12 @@ app.get('/search', function(req, res){
 //TODO: duplicate of function below?
 //not sure why this just sends all of the data
 app.get('/favorites', function(req, res){
-  //read the the data.json from the filesystem
-  var data = fs.readFileSync('./data.json');
-
-  //TODO: apply filters the data?
-
   //setup the response header to notify the client we're sending them JSON data.
   //we do this by setting the Content-Type to application/json
   res.setHeader('Content-Type', 'application/json');
 
   //send the json data back to the client
-  res.send(data);
+  res.send(getFavoritesDB());
 }); 
 
 /** bind a GET handler to the /favorites URI
@@ -93,23 +122,26 @@ app.get('/favorites', function(req, res){
 //TODO: this looks like it should be PUT request not a get
 app.post('/favorites', function(req, res){
 
-  if(!req.body.imdbID){
+  var movie = req.body;
+
+  if(!movie.imdbID){
     res.send("Error. Request body does not have a valid imdbID");
     return;
   }
-  
+
   //read in the current data from our file
-  var data = JSON.parse(fs.readFileSync('./data.json'));
+  var favorites = getFavoritesDB();
 
-  //append the data from the client to the data file
-  data.push(req.body);
-
-  //save the new data to our filesystem for persistence
-  fs.writeFile('./data.json', JSON.stringify(data));
-
+  //if the movie is selected to be a favorite and we don't already contain
+  //that data in our database then add the data
+  if(movie.isFavorite)
+    setFavoritesDB(addFavoriteMovie(favorites, movie));
+  else
+    setFavoritesDB(removeFavoriteMovie(favorites, movie.imdbID));
+      
   //return the newly formed data to the client
   res.setHeader('Content-Type', 'application/json');
-  res.send(data);
+  res.send(movie);
 });
 
 /** run the webserver. This is like running the main() in a c program 
