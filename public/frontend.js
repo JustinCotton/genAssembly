@@ -318,7 +318,7 @@ function submitMovieSearch() {
     return;
   }
 
-  searchMovieByTitle()
+  searchMovieByTitle(searchText)
     .then((movies) => {
       createMovieTitles(movies);
     });

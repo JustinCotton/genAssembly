@@ -52,7 +52,7 @@ function searchMovie(searchText) {
   //send the request
   return request('http://www.omdbapi.com/?'+search)
     .then((moviesAsJSONString) => {
-      return JSON.parse(moviesAsJSONString).Search;
+      return JSON.parse(moviesAsJSONString).Search || [];
     });
 }
 
