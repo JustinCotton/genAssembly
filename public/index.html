@@ -7,6 +7,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css">
     <link rel="stylesheet" href="/css/font-awesome.min.css">
     <script src="frontend.js"></script>
+    <style>
+      #favoritesButton {
+        margin-top: 1em;
+      }
+    </style>
   </head>
   <body>
     <div class="section">
@@ -17,16 +22,19 @@
             <h1 class="title is-1">Movie Lister</h1>
             <h2 class="subtitle">Lookup movies by title</h1>
 
-            <div class="field has-addons">
-              <div class="control is-expanded">
-                <input id="movieSearchText" class="input is-large is-rounded" type="text" placeholder="Movie Title">
+            <form onsubmit="event.preventDefault(); submitMovieSearch();">
+              <div class="field has-addons">
+                <div class="control is-expanded">
+                  <input id="movieSearchText" class="input is-large is-rounded" type="text" placeholder="Movie Title">
+                </div>
+                <div class="control">
+                  <button class="button is-primary is-large is-rounded"><i class="fa fa-search"></i></button>
+                </div>
               </div>
-              <div class="control">
-                <button onclick="submitMovieSearch()" class="button is-primary is-large is-rounded"><i class="fa fa-search"></i></button>
-              </div>
-            </div>
+            </form>
 
-            <button class="button is-rounded is-info" onclick="showFavorites()"><i class="fa fa-star-o"></i>&nbsp; Favorites</button>
+            <button id="favoritesButton" class="button is-rounded is-info is-medium" onclick="showFavorites()"><i class="fa fa-star-o"></i>&nbsp; Favorites</button>
+
           </div>
         </div>
       </div>

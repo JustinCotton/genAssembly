@@ -103,7 +103,7 @@ function getFavoritesDB() {
  */
 function setFavoritesDB(favorites) {
   //save the new data to our filesystem for persistence
-  fs.writeFile('./data.json', JSON.stringify(favorites));
+  fs.writeFileSync('./data.json', JSON.stringify(favorites));
 }
 
 /** Adds a movie to the list of favorites.
