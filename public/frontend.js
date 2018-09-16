@@ -301,7 +301,10 @@ function renderMovieTile(movieMediaObject) {
 }
 
 
-/** Creates a single row of 3 movie tiles (using renderMovieTile) */
+/** Creates a single row using the given list of movie tiles (created using
+ * renderMovieTile) 
+ *
+ */
 function renderMovieTileRow(movieTiles) {
   var ancenstor = document.createElement("div");
   ancenstor.setAttribute("class", "tile is-ancestor");
@@ -331,20 +334,28 @@ function renderNoMoviesMsg() {
  *
  */
 function renderMovieTitles(movies) {
+  //fetch the container that will hold the search results
   var movieCardsContainer = document.getElementById("movieCards");
 
+	//make sure to remove any content previously generated in the container
+	//first.
   movieCardsContainer.innerHTML = '';
 
+	//if we don't have any movies to render then let the user know
   if(movies.length == 0)
   {
     movieCardsContainer.appendChild(renderNoMoviesMsg());
     movieCardsContainer.setAttribute("class", "has-text-centered");
   }
 
+  //if as long as we have movies...
   while(movies.length > 0)
   {
+	  //add new movieTileRow to the container...
     movieCardsContainer.appendChild(
       renderMovieTileRow(
+				//...which is created by extracting the first 3 elements of the movies
+				//list and generating a new tile for each movie
         movies.splice(0, 3).map(movie => 
           renderMovieTile(renderMovieMediaObject(movie))
         )
@@ -358,13 +369,19 @@ function renderMovieTitles(movies) {
  *
  */
 function submitMovieSearch() {
+
+  //grab the search text from the text box. Make sure to trim the text
+	//to remove uneeded whitespace
   var searchText = document.getElementById("movieSearchText").value.trim();
 
+  //if the user didn't type in any text
   if(!searchText || searchText === '')
   {
     return;
   }
 
+	//then search for the movies asynchronously and display the results to the
+	//page
   searchMovieByTitle(searchText)
     .then((movies) => {
       renderMovieTitles(movies);
@@ -386,12 +403,17 @@ function showFavorites() {
 function showMovieDetailsModal(imdbID) {
   getMovieDetails(imdbID)
     .then(movieData => {
+			//fetch the container to hold the modal content
       var detailsContent = document.getElementById("movieDetails");
 
+      //remove previous content in the container
       detailsContent.innerHTML = '';
 
+			//render the new details content and add it to the container
       detailsContent.appendChild(renderMovieDetails(movieData));
 
+      //replace the class attribute of the container to activate the 
+			//modal. The CSS in Bulma displays the content
       document.getElementById("detailsModal")
         .setAttribute("class", "modal is-active");
     });
@@ -399,6 +421,7 @@ function showMovieDetailsModal(imdbID) {
 
 /** Callback used to hide the details modal */
 function hideDetailsModal() {
+  //sets the class attribute of the details modal to hide it
   document.getElementById("detailsModal")
     .setAttribute("class", "modal");
 }
