@@ -1,3 +1,12 @@
+/** This is the frontend code for the web-app.
+ *
+ * Here we perform the client-side logic of our program
+ * as well as dynamically rendering the page content.
+ * 
+ * We use Bulma as a CSS framework for making nice looking page components.
+ * see https://bulma.io/documentation/ for more information regarding Bulma
+ */
+
 /** Fetch a list of movies from our backend */
 function searchMovieByTitle(title) {
   return fetch("/search?name="+title)
@@ -10,6 +19,8 @@ function searchMovieByTitle(title) {
 function toggleMovieFavorite(movieData) {
   movieData.isFavorite = !movieData.isFavorite;
 
+  //create new request headers. If we don't tell the server we're sending it
+  //JSON data then it will throw exceptions
   var reqHeaders = new Headers();
   reqHeaders.append('Content-type', 'application/json');
 
@@ -41,7 +52,9 @@ function getFavoriteIconClass(isFavorite) {
   return isFavorite ? "fa fa-star" : "fa fa-star-o";
 }
 
-/** Creates the button to use for setting whether a movie is a favorite */
+/** Creates the button to use for setting whether a movie is a favorite 
+ * 
+ */
 function renderFavoritesButton(movieData) {
   var button = document.createElement("a");
   button.setAttribute("class", "button is-rounded");
@@ -55,12 +68,15 @@ function renderFavoritesButton(movieData) {
   iconWrapper.appendChild(icon);
   button.appendChild(iconWrapper);
 
+  //add an onclick event to the button we're creating so that when
+  //the user clicks it we can update the movie data in the backend.
   button.onclick = function () { 
     toggleMovieFavorite(movieData)
       .then(newMovieData => {
         icon.setAttribute("class", getFavoriteIconClass(newMovieData.isFavorite));
       }); 
 
+    //return false so the browser doesn't attempt to go to another page.
     return false; 
   };
 
@@ -69,16 +85,16 @@ function renderFavoritesButton(movieData) {
 
 /** Creates the Ratings data for a movie as a series of paragraphs */
 function renderRatingsList(ratings) {
-  var list = document.createElement("span");
+  var span = document.createElement("span");
 
   ratings.forEach(rating => {
-    var ol = document.createElement("p");
-    ol.textContent = rating.Source + " - " + rating.Value;
+    var p = document.createElement("p");
+    p.textContent = rating.Source + " - " + rating.Value;
 
-    list.appendChild(ol);
+    span.appendChild(p);
   });
 
-  return list;
+  return span;
 }
 
 /** Creates a table to display the full details of a movie */
@@ -86,11 +102,17 @@ function renderMovieDetailsTable(movieData) {
   var table = document.createElement("table");
   table.setAttribute("class", "table");
 
+  //iterate over every immediate key in the movieData object
+  //add create a new table row where the key is the first column
+  //and the corresponding value is the second column.
   for(key in movieData)
   {
-    if(!movieData.hasOwnProperty(k))
+    //if the key isn't a direct attribute of the movie object then skip it
+    //(it's something that's inherited and it's data we don't care about)
+    if(!movieData.hasOwnProperty(key))
       continue;
 
+    //don't show the Poster URL since we're already showing the poster
     if(key === 'Poster')
       continue;
 
@@ -100,8 +122,9 @@ function renderMovieDetailsTable(movieData) {
 
     title.textContent = key;
 
+    //render the Ratings data differently. Everything else should be plain text
     if(key === 'Ratings')
-      value.appendChild(renderRatingsList(movieData[k]));
+      value.appendChild(renderRatingsList(movieData[key]));
     else 
       value.textContent = movieData[key];
   }
@@ -109,49 +132,50 @@ function renderMovieDetailsTable(movieData) {
   return table;
 }
 
-/** Creates a container to display the Poster image and full details of a movie */
+/** Creates a container to display the Poster image and full details of a movie
+ *
+ * see https://bulma.io/documentation/layout/media-object/ for an example media
+ * object.
+ */
 function renderMovieDetails(movieData) {
+
+	//create a container to hold the details data
   var box = document.createElement("div");
   box.setAttribute("class", "box");
 
-  var columns = document.createElement("div");
-  columns.setAttribute("class", "columns");
+  //creaate a container to hold the content
+  var content = document.createElement("div");
+  content.setAttribute("class", "content");
 
-  var figure = document.createElement("div");
-  figure.setAttribute("class", "column");
-
+  //create the image container
   var imgWrapper = document.createElement("p");
-  imgWrapper.setAttribute("class", "image is-3by4");
+  imgWrapper.setAttribute("class", "image is-3by4" );
 
+  //..and the image
   var movieImg = document.createElement("img");
   movieImg.setAttribute("src", movieData.Poster);
   movieImg.setAttribute("alt", movieData.Title);
 
-  var mediaContent = document.createElement("div");
-  mediaContent.setAttribute("class", "column");
-
-  var contentWrapper = document.createElement("div");
-  contentWrapper.setAttribute("class", "content");
-
+  //create the title
   var movieCardTitle = document.createElement("p");
   movieCardTitle.setAttribute("class", "title is-5");
   movieCardTitle.textContent = movieData.Title;
 
+  //create the subtitle
   var movieCardSubtitle = document.createElement("p");
   movieCardSubtitle.setAttribute("class", "subtitle is-6");
   movieCardSubtitle.textContent = movieData.Year;
 
+  //nest the HTML nodes (inner to outer)
+  content.appendChild(movieCardTitle);
+  content.appendChild(movieCardSubtitle);
+
   imgWrapper.appendChild(movieImg);
-  figure.appendChild(imgWrapper);
-  columns.appendChild(figure);
+  content.appendChild(imgWrapper);
 
-  contentWrapper.appendChild(movieCardTitle);
-  contentWrapper.appendChild(movieCardSubtitle);
-  contentWrapper.appendChild(renderMovieDetailsTable(movieData));
-  mediaContent.appendChild(contentWrapper);
-  columns.appendChild(mediaContent);
+  content.appendChild(renderMovieDetailsTable(movieData));
 
-  box.appendChild(columns);
+  box.appendChild(content);
 
   return box;
 }
@@ -167,9 +191,12 @@ function renderDetailsLink(imdbID) {
   button.appendChild(icon);
   button.appendChild(document.createTextNode("\u00a0 Details"));
 
+  //create an onclick event that handles displaying the details modal
   button.onclick = function () {
     showMovieDetailsModal(imdbID);
 
+		//tell the event handler to not jump to a new page when we're done
+		//handling the event.
     return false;
   };
 
@@ -199,38 +226,52 @@ function renderDetailsLevel(movieData) {
  * This displays a mini-image of the Poster, the Title, and year. 
  * It also contains the favorites button and the details level.
  *
+ * see https://bulma.io/documentation/layout/media-object/ for more information
+ * on media objects
  */
 function renderMovieMediaObject(movieData) {
+	//the Bulma uses the article HTML element to contain the content for a media
+  //object
   var article = document.createElement("article");
   article.setAttribute("class", "media");
 
+  //create a wrapper to contain the image
   var figure = document.createElement("figure");
   figure.setAttribute("class", "media-left");
 
+  //...and another wrapper (per the Bulma documentation)
   var imgWrapper = document.createElement("p");
   imgWrapper.setAttribute("class", "image is-64x64 is-3by4");
 
+  //...now create the image
   var movieImg = document.createElement("img");
   movieImg.setAttribute("src", movieData.Poster);
   movieImg.setAttribute("alt", movieData.Title);
 
+  //create a wrapper to contain the title and year
   var mediaContent = document.createElement("div");
   mediaContent.setAttribute("class", "media-content");
 
+  //...and another wrapper to make the display have enough
+  //padding. Again, a Bulma thing.
   var contentWrapper = document.createElement("div");
   contentWrapper.setAttribute("class", "content");
 
+  //a display for the movie title
   var movieCardTitle = document.createElement("p");
   movieCardTitle.setAttribute("class", "title is-5");
   movieCardTitle.textContent = movieData.Title;
 
+  //a display for the movie subtitle
   var movieCardSubtitle = document.createElement("p");
   movieCardSubtitle.setAttribute("class", "subtitle is-6");
   movieCardSubtitle.textContent = movieData.Year;
 
+  //a container to hold the favorites button
   var mediaRight = document.createElement("div");
   mediaRight.setAttribute("class", "media-right");
 
+  //nest the HTML nodes (starting with the most inner)
   imgWrapper.appendChild(movieImg);
   figure.appendChild(imgWrapper);
   article.appendChild(figure);
