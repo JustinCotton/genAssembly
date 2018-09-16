@@ -43,7 +43,12 @@ app.use('/', express.static(path.join(__dirname, 'public')));
  * This returns a list of movie data or an empty list on error
  */
 function searchMovie(searchText) {
-  if(typeof(searchText) != 'string' || searchText === '')
+	//remove excess white space from search text
+	searchText = searchText.trim();
+
+	//if we were given an empty string don't even try to send a request to omdb
+	//just return an empty list
+  if(searchText === '')
   {
     return Promise.resolve([]);
   }
@@ -62,6 +67,9 @@ function searchMovie(searchText) {
  *
  */
 function getMovieDetails(imdbID) {
+	
+	//same as above. Return an empty list immediately if
+	//we were given an invalid string
   if(typeof(imdbID) != 'string' || imdbID === '')
   {
     return Promise.resolve([]);
@@ -101,6 +109,8 @@ function setFavoritesDB(favorites) {
  * weren't previously marked as being favorited (`movie.isFavorite === true`)
  */
 function addFavoriteMovie(favorites, movie) {
+	//make sure the movie is marked as a favorite
+	//and that there isn't already a movie with the same id in the db
   if(movie.isFavorite 
     && !favorites.some(favoriteMovie => favoriteMovie.imdbID == movie.imdbID)
   ){
