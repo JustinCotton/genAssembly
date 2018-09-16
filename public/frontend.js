@@ -27,11 +27,11 @@ function getMovieDetails(imdbID) {
     .then((res) => { return res.json(); });
 }
 
-function makeFavoriteIconClass(isFavorite) {
+function getFavoriteIconClass(isFavorite) {
   return isFavorite ? "fa fa-star" : "fa fa-star-o";
 }
 
-function createFavoritesButton(movieData) {
+function renderFavoritesButton(movieData) {
   var button = document.createElement("a");
   button.setAttribute("class", "button is-rounded");
 
@@ -39,7 +39,7 @@ function createFavoritesButton(movieData) {
   iconWrapper.setAttribute("class", "icon is-small");
 
   var icon = document.createElement("i");
-  icon.setAttribute("class", makeFavoriteIconClass(movieData.isFavorite || false));
+  icon.setAttribute("class", getFavoriteIconClass(movieData.isFavorite || false));
 
   iconWrapper.appendChild(icon);
   button.appendChild(iconWrapper);
@@ -47,7 +47,7 @@ function createFavoritesButton(movieData) {
   button.onclick = function () { 
     toggleMovieFavorite(movieData)
       .then(newMovieData => {
-        icon.setAttribute("class", makeFavoriteIconClass(newMovieData.isFavorite));
+        icon.setAttribute("class", getFavoriteIconClass(newMovieData.isFavorite));
       }); 
 
     return false; 
@@ -56,7 +56,7 @@ function createFavoritesButton(movieData) {
   return button;
 }
 
-function createRatingsList(ratings) {
+function renderRatingsList(ratings) {
   var list = document.createElement("span");
 
   ratings.forEach(rating => {
@@ -69,7 +69,7 @@ function createRatingsList(ratings) {
   return list;
 }
 
-function createMovieDetailsTable(obj) {
+function renderMovieDetailsTable(obj) {
   var table = document.createElement("table");
   table.setAttribute("class", "table");
 
@@ -87,7 +87,7 @@ function createMovieDetailsTable(obj) {
       title.textContent = k;
 
       if(k === 'Ratings') {
-        value.appendChild(createRatingsList(obj[k]));
+        value.appendChild(renderRatingsList(obj[k]));
       }
       else {
         value.textContent = obj[k];
@@ -98,7 +98,7 @@ function createMovieDetailsTable(obj) {
   return table;
 }
 
-function createMovieDetails(movieData) {
+function renderMovieDetails(movieData) {
   var box = document.createElement("div");
   box.setAttribute("class", "box");
 
@@ -135,7 +135,7 @@ function createMovieDetails(movieData) {
 
   contentWrapper.appendChild(movieCardTitle);
   contentWrapper.appendChild(movieCardSubtitle);
-  contentWrapper.appendChild(createMovieDetailsTable(movieData));
+  contentWrapper.appendChild(renderMovieDetailsTable(movieData));
   mediaContent.appendChild(contentWrapper);
   columns.appendChild(mediaContent);
 
@@ -144,26 +144,7 @@ function createMovieDetails(movieData) {
   return box;
 }
 
-function showMovieDetailsModal(imdbID) {
-  getMovieDetails(imdbID)
-    .then(movieData => {
-      var detailsContent = document.getElementById("movieDetails");
-
-      detailsContent.innerHTML = '';
-
-      detailsContent.appendChild(createMovieDetails(movieData));
-
-      document.getElementById("detailsModal")
-        .setAttribute("class", "modal is-active");
-    });
-}
-
-function hideDetailsModal() {
-  document.getElementById("detailsModal")
-    .setAttribute("class", "modal");
-}
-
-function createDetailsLink(imdbID) {
+function renderDetailsLink(imdbID) {
   var button = document.createElement("a");
   button.setAttribute("class", "level-item");
 
@@ -182,20 +163,20 @@ function createDetailsLink(imdbID) {
   return button;
 }
 
-function createDetailsLevel(movieData) { 
+function renderDetailsLevel(movieData) { 
   var level = document.createElement("nav");
   level.setAttribute("class", "level");
 
   var levelLeft = document.createElement("div");
   levelLeft.setAttribute("class", "level-left");
 
-  levelLeft.append(createDetailsLink(movieData.imdbID));
+  levelLeft.append(renderDetailsLink(movieData.imdbID));
   level.append(levelLeft);
 
   return level;
 }
 
-function createMovieMediaObject(movieData) {
+function renderMovieMediaObject(movieData) {
   var article = document.createElement("article");
   article.setAttribute("class", "media");
 
@@ -232,17 +213,17 @@ function createMovieMediaObject(movieData) {
 
   contentWrapper.appendChild(movieCardTitle);
   contentWrapper.appendChild(movieCardSubtitle);
-  contentWrapper.appendChild(createDetailsLevel(movieData));
+  contentWrapper.appendChild(renderDetailsLevel(movieData));
   mediaContent.appendChild(contentWrapper);
   article.appendChild(mediaContent);
 
-  mediaRight.appendChild(createFavoritesButton(movieData));
+  mediaRight.appendChild(renderFavoritesButton(movieData));
   article.appendChild(mediaRight);
 
   return article;
 }
 
-function createMovieTile(movieMediaObject) {
+function renderMovieTile(movieMediaObject) {
   var tile = document.createElement("div");
   tile.setAttribute("class", "tile is-child box");
 
@@ -251,7 +232,7 @@ function createMovieTile(movieMediaObject) {
   return tile;
 }
 
-function makeMovieTileRow(movieTiles) {
+function renderMovieTileRow(movieTiles) {
   var ancenstor = document.createElement("div");
   ancenstor.setAttribute("class", "tile is-ancestor");
 
@@ -266,7 +247,7 @@ function makeMovieTileRow(movieTiles) {
   return ancenstor;
 }
 
-function createNoMoviesHero() {
+function renderNoMoviesHero() {
   //var hero = document.createElement("div");
   //hero.setAttribute("class", "hero");
 
@@ -287,23 +268,23 @@ function createNoMoviesHero() {
   return title;
 }
 
-function createMovieTitles(movies) {
+function renderMovieTitles(movies) {
   var movieCardsContainer = document.getElementById("movieCards");
 
   movieCardsContainer.innerHTML = '';
 
   if(movies.length == 0)
   {
-    movieCardsContainer.appendChild(createNoMoviesHero());
+    movieCardsContainer.appendChild(renderNoMoviesHero());
     movieCardsContainer.setAttribute("class", "has-text-centered");
   }
 
   while(movies.length > 0)
   {
     movieCardsContainer.appendChild(
-      makeMovieTileRow(
+      renderMovieTileRow(
         movies.splice(0, 3).map(movie => 
-          createMovieTile(createMovieMediaObject(movie))
+          renderMovieTile(renderMovieMediaObject(movie))
         )
       )
     );
@@ -320,13 +301,32 @@ function submitMovieSearch() {
 
   searchMovieByTitle(searchText)
     .then((movies) => {
-      createMovieTitles(movies);
+      renderMovieTitles(movies);
     });
 }
 
 function showFavorites() {
   getMovieFavorites()
     .then(favorites => {
-      createMovieTitles(favorites);
+      renderMovieTitles(favorites);
     });
+}
+
+function showMovieDetailsModal(imdbID) {
+  getMovieDetails(imdbID)
+    .then(movieData => {
+      var detailsContent = document.getElementById("movieDetails");
+
+      detailsContent.innerHTML = '';
+
+      detailsContent.appendChild(renderMovieDetails(movieData));
+
+      document.getElementById("detailsModal")
+        .setAttribute("class", "modal is-active");
+    });
+}
+
+function hideDetailsModal() {
+  document.getElementById("detailsModal")
+    .setAttribute("class", "modal");
 }
