@@ -1,3 +1,17 @@
+/** This the main backend server. 
+ *
+ * This code handles the business logic of our program (like fetching and
+ * storing data from the database).
+ *
+ * The following are the main URL handlers we support
+ *
+ * /favorites  GET  fetches all movies marked as favorite
+ * /favorites  POST saves a movie that is marked as favorite
+ * /search     GET  fetches all movies whos titles contain the given search text
+ * /details    GET  fetches the full list of details for a movie
+ *
+ */
+
 /** import the necessary node packages */
 var express = require('express');
 var fs = require('fs');           // allow access to filesystem
