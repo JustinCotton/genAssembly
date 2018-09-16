@@ -14,7 +14,10 @@ var bodyParser = require('body-parser');
 var app = express();
 
 /** this is an API key required to send queries to ombd */
-var omdbApiKey = "c41ae294";
+const omdbApiKey = "c41ae294";
+
+/** the port to run the webserver on */
+const port = process.env.PORT || 5000
 
 /** add `./public` as a root for static resources */
 app.use(express.static(path.join(__dirname, '/public')));
@@ -215,6 +218,6 @@ app.get('/details', function(req, res) {
  *
  * see https://expressjs.com/en/4x/api.html#app.listen
  */
-app.listen(8080, function(){
-  console.log("Listening on port 8080");
+app.listen(port, function(){
+  console.log("Listening on port " + port);
 });
