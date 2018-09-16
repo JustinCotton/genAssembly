@@ -1,8 +1,12 @@
+/** Fetch a list of movies from our backend */
 function searchMovieByTitle(title) {
   return fetch("/search?name="+title)
     .then((res) => { return res.json(); });
 }
 
+/** Set/Unset the isFavorite flag in the given movie data 
+ * and save it to the backend
+ */
 function toggleMovieFavorite(movieData) {
   movieData.isFavorite = !movieData.isFavorite;
 
@@ -17,20 +21,27 @@ function toggleMovieFavorite(movieData) {
   .then(res => { return res.json(); });
 }
 
+/** Fetch the list of favorite movies from the backend */
 function getMovieFavorites() {
   return fetch("/favorites")
     .then((res) => { return res.json(); });
 }
 
+/** Get the full details for the given movie from the backend */
 function getMovieDetails(imdbID) {
   return fetch("/details?imdbID="+imdbID)
     .then((res) => { return res.json(); });
 }
 
+/** Create the class to use for the favorites icon 
+ * given the isFavorite state
+ *
+ */
 function getFavoriteIconClass(isFavorite) {
   return isFavorite ? "fa fa-star" : "fa fa-star-o";
 }
 
+/** Creates the button to use for setting whether a movie is a favorite */
 function renderFavoritesButton(movieData) {
   var button = document.createElement("a");
   button.setAttribute("class", "button is-rounded");
@@ -56,6 +67,7 @@ function renderFavoritesButton(movieData) {
   return button;
 }
 
+/** Creates the Ratings data for a movie as a series of paragraphs */
 function renderRatingsList(ratings) {
   var list = document.createElement("span");
 
@@ -69,35 +81,35 @@ function renderRatingsList(ratings) {
   return list;
 }
 
-function renderMovieDetailsTable(obj) {
+/** Creates a table to display the full details of a movie */
+function renderMovieDetailsTable(movieData) {
   var table = document.createElement("table");
   table.setAttribute("class", "table");
 
-  for(k in obj)
+  for(key in movieData)
   {
-    if(obj.hasOwnProperty(k))
-    {
-      if(k === 'Poster')
-        continue;
+    if(!movieData.hasOwnProperty(k))
+      continue;
 
-      var row = table.insertRow();
-      var title = row.insertCell();
-      var value = row.insertCell();
+    if(key === 'Poster')
+      continue;
 
-      title.textContent = k;
+    var row = table.insertRow();
+    var title = row.insertCell();
+    var value = row.insertCell();
 
-      if(k === 'Ratings') {
-        value.appendChild(renderRatingsList(obj[k]));
-      }
-      else {
-        value.textContent = obj[k];
-      }
-    }
+    title.textContent = key;
+
+    if(key === 'Ratings')
+      value.appendChild(renderRatingsList(movieData[k]));
+    else 
+      value.textContent = movieData[key];
   }
 
   return table;
 }
 
+/** Creates a container to display the Poster image and full details of a movie */
 function renderMovieDetails(movieData) {
   var box = document.createElement("div");
   box.setAttribute("class", "box");
@@ -144,6 +156,7 @@ function renderMovieDetails(movieData) {
   return box;
 }
 
+/** Creates a link for the user to select for displaying the movie details */
 function renderDetailsLink(imdbID) {
   var button = document.createElement("a");
   button.setAttribute("class", "level-item");
@@ -163,6 +176,11 @@ function renderDetailsLink(imdbID) {
   return button;
 }
 
+/** Creates a container to hold the link for showing the details 
+ *
+ * The container is implemented as a Bulma level.
+ *
+ */
 function renderDetailsLevel(movieData) { 
   var level = document.createElement("nav");
   level.setAttribute("class", "level");
@@ -176,6 +194,12 @@ function renderDetailsLevel(movieData) {
   return level;
 }
 
+/** Creates a Bulma media object to show the basic information for a given movie
+ *
+ * This displays a mini-image of the Poster, the Title, and year. 
+ * It also contains the favorites button and the details level.
+ *
+ */
 function renderMovieMediaObject(movieData) {
   var article = document.createElement("article");
   article.setAttribute("class", "media");
@@ -223,6 +247,9 @@ function renderMovieMediaObject(movieData) {
   return article;
 }
 
+/** Creates a container for a movie mediaObject
+ *
+ */
 function renderMovieTile(movieMediaObject) {
   var tile = document.createElement("div");
   tile.setAttribute("class", "tile is-child box");
@@ -232,6 +259,8 @@ function renderMovieTile(movieMediaObject) {
   return tile;
 }
 
+
+/** Creates a single row of 3 movie tiles (using renderMovieTile) */
 function renderMovieTileRow(movieTiles) {
   var ancenstor = document.createElement("div");
   ancenstor.setAttribute("class", "tile is-ancestor");
@@ -247,27 +276,19 @@ function renderMovieTileRow(movieTiles) {
   return ancenstor;
 }
 
-function renderNoMoviesHero() {
-  //var hero = document.createElement("div");
-  //hero.setAttribute("class", "hero");
-
-  //var heroBody = document.createElement("div");
-  //heroBody.setAttribute("class", "hero-body");
-
-  //var contentContainer = document.createElement("div");
-  //contentContainer.setAttribute("class", "container");
-
+/** Creates a message to notify the user that there are not movies to show */
+function renderNoMoviesMsg() {
   var title = document.createElement("h1");
   title.setAttribute("class", "title is-1");
 
   title.textContent = "There are no movies to display";
 
-  //var subTitle = document.createElement("div");
-  //contentContainer.setAttribute("class", "container");
-
   return title;
 }
 
+/** 
+ *
+ */
 function renderMovieTitles(movies) {
   var movieCardsContainer = document.getElementById("movieCards");
 
@@ -275,7 +296,7 @@ function renderMovieTitles(movies) {
 
   if(movies.length == 0)
   {
-    movieCardsContainer.appendChild(renderNoMoviesHero());
+    movieCardsContainer.appendChild(renderNoMoviesMsg());
     movieCardsContainer.setAttribute("class", "has-text-centered");
   }
 
@@ -291,6 +312,10 @@ function renderMovieTitles(movies) {
   }
 }
 
+/** Callback that is used to send of a movie search to the back-end and display
+ * the results 
+ *
+ */
 function submitMovieSearch() {
   var searchText = document.getElementById("movieSearchText").value.trim();
 
@@ -305,6 +330,7 @@ function submitMovieSearch() {
     });
 }
 
+/** Callback used to display the list of favorites */
 function showFavorites() {
   getMovieFavorites()
     .then(favorites => {
@@ -312,6 +338,10 @@ function showFavorites() {
     });
 }
 
+/** Callback used to display fetch the full details and display the details
+ * modal for a movie 
+ *
+ */
 function showMovieDetailsModal(imdbID) {
   getMovieDetails(imdbID)
     .then(movieData => {
@@ -326,6 +356,7 @@ function showMovieDetailsModal(imdbID) {
     });
 }
 
+/** Callback used to hide the details modal */
 function hideDetailsModal() {
   document.getElementById("detailsModal")
     .setAttribute("class", "modal");
